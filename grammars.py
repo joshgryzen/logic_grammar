@@ -1,3 +1,73 @@
+MINI_ACE_GRAMMAR = r"""
+start: sentence
+
+// --------------------
+// Sentence types
+// --------------------
+
+sentence: implication
+        | simple_sentence
+
+// --------------------
+// Implication
+// --------------------
+
+implication: simple_sentence "if" condition
+
+// --------------------
+// Conditions 
+// --------------------
+
+condition: literal
+         | literal "and" condition   // recursive conjunction
+
+// --------------------
+// Simple sentences
+// --------------------
+
+simple_sentence: literal
+               | literal "and" simple_sentence   // optional top-level conjunction
+
+// --------------------
+// Literals
+// --------------------
+
+literal: atom
+       | "not" atom
+
+// --------------------
+// Atoms
+// --------------------
+
+atom: predicate
+
+// --------------------
+// Predicates
+// --------------------
+
+predicate: "a" | "b" | "c"
+
+%import common.WS
+%ignore WS
+"""
+
+MINI_CNL_GRAMMAR = r"""
+start: sentence
+
+sentence: "a" "is" "true" "if" condition
+
+condition: literal
+         | literal "and" literal
+
+literal: atom
+       | "not" atom
+
+atom: "a" | "b" | "c"
+       
+%import common.WS
+%ignore WS
+"""
+
 SMALL_FOL_GRAMMAR = r"""
 start: formula
 
