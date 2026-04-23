@@ -845,7 +845,7 @@ rule: head (":-" body)? "."
 // Program
 // --------------------
 
-program: rule+
+program: rule*
 
 start: program
 """

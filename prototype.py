@@ -22,12 +22,11 @@ model = outlines.from_transformers(
 ds = load_dataset("tasksource/ruletaker", split="train")
 
 # ========================================== Prompt for ASP generation ==========================================
-def build_prompt(context):
-    return f"""
-Translate the following statements into an Answer Set Programming (ASP) program.
+"""
 
 Rules:
-- Use format: head :- body.
+- Basic rules are of the form: head :- body.
+- Basic facts are of the form: head.
 - Use lowercase predicates
 - Use X for variables
 - Use 'not' for negation in the body of a rule
@@ -35,6 +34,10 @@ Rules:
 - End each rule with a period
 
 Examples:
+"""
+def build_prompt(context):
+    return f"""
+Translate the following statements into an Answer Set Programming (ASP) program.
 Input: Anne is quiet.
 Output: quiet(anne).
 
@@ -127,7 +130,10 @@ def evaluate(n_examples=5):
         print("Question:", question)
 
         asp_raw = nl_to_asp(context)
-        asp_program = clean_asp(asp_raw)
+        try:
+            asp_program = clean_asp(asp_raw)
+        except:
+            asp_program = "error"
 
         print("\nGenerated ASP:")
         print(asp_program)
