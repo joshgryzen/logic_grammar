@@ -824,10 +824,10 @@ atomic_formula: comparison | literal
 
 basic_head: atom
 choice_head: "{" atom "}"
-strong_negation: "-" atom
+negated_head: "not" atom
 # falsity: "#false"?
 
-head: basic_head | choice_head | strong_negation
+head: basic_head | choice_head | negated_head
 
 // --------------------
 // Body

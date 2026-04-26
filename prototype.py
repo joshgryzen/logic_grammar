@@ -106,13 +106,13 @@ Output:
 # ========================================== NL → ASP ==========================================
 def nl_to_asp(context):
     prompt = build_prompt(context)
-    # print(prompt)
+    print("Prompt: ", prompt)
     output = model(
         prompt,
         CFG(ASP_GRAMMAR),
         # max_new_tokens=150,
     )
-    # print(output)
+    print("Output:", output)
     return output.strip()
 
 # ========================================== Clean ASP output ==========================================
