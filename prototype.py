@@ -49,37 +49,7 @@ Rules:
 - End each rule with a period
 
 Examples:
-"""
-def build_prompt(context):
-    return f"""
-Translate the following statements into an Answer Set Programming (ASP) program.
 
-Rules:
-- Each sentence of the form "Name is property" becomes a fact: property(name).
-- Each sentence of the form "Name is not property" becomes: not property(name).
-- Names must be lowercase constants.
-- Properties become lowercase predicates.
-- General statements like "P, Q things are R" become rules: r(X) :- p(X), q(X).
-- If the conclusion is negated (e.g., "are not smart"), use: not smart(X).
-- Use exactly one variable X in rules.
-- Separate all facts and rules with a period and a space.
-- Do not include any extra text or explanations.
-- Output only a valid ASP program.
-
-Input: John is quiet. John is not young. Steve is kind. Steve is young. Dan is rough. Dan is round. Dan is smart. Dan is not young. Jane is quiet. Jane is not round. Kind, young things are not smart.
-Output: quiet(john). not young(john). kind(steve). young(steve). rough(dan). round(dan). smart(dan). not young(dan). quiet(jane). not round(jane). not smart(X) :- kind(X), young(X).
-
-Input: Tom is tall. Tom is not kind. Sara is kind. Sara is tall. Kind, tall things are happy.
-Output: tall(tom). not kind(tom). kind(sara). tall(sara). happy(X) :- kind(X), tall(X).
-
-Input: Liam is strong. Liam is young. Emma is strong. Emma is not young. Strong, young things are brave.
-Output: strong(liam). young(liam). strong(emma). not young(emma). brave(X) :- strong(X), young(X).
-
-Input: Noah is smart. Noah is quiet. Ava is quiet. Ava is not smart. Quiet things are calm.
-Output: smart(noah). quiet(noah). quiet(ava). not smart(ava). calm(X) :- quiet(X).
-
-Input: Mia is kind. Mia is young. Ethan is kind. Ethan is not young. Kind things are friendly.
-Output: kind(mia). young(mia). kind(ethan). not young(ethan). friendly(X) :- kind(X).
 
 Input: Olivia is fast. Olivia is strong. Lucas is fast. Lucas is not strong. Fast, strong things are powerful.
 Output: fast(olivia). strong(olivia). fast(lucas). not strong(lucas). powerful(X) :- fast(X), strong(X).
@@ -98,6 +68,43 @@ Output: kind(ava). young(ava). tall(ben). strong(ben). friendly(X) :- kind(X). p
 
 Input: Leo is smart. Leo is quiet. Mila is quiet. Mila is not smart. Quiet things are thoughtful. Smart, quiet things are focused.
 Output: smart(leo). quiet(leo). quiet(mila). not smart(mila). thoughtful(X) :- quiet(X). focused(X) :- smart(X), quiet(X).
+
+
+"""
+def build_prompt(context):
+    return f"""
+Translate the following statements into an Answer Set Programming (ASP) program.
+
+Rules:
+- Each sentence of the form "Name is property" becomes a fact: property(name).
+- Each sentence of the form "Name is not property" becomes: not property(name).
+- Names must be lowercase constants.
+- Properties become lowercase predicates.
+- General statements like "P, Q things are R" become rules: r(X) :- p(X), q(X).
+- If the conclusion is negated (e.g., "are not smart"), use: not smart(X).
+- Use exactly one variable X in rules.
+- Separate all facts and rules with a period and a space.
+- Do not include any extra text or explanations.
+- Output only a valid ASP program.
+
+Examples:
+
+Input: John is quiet. John is not young. Steve is kind. Steve is young. Dan is rough. Dan is round. Dan is smart. Dan is not young. Jane is quiet. Jane is not round. Kind, young things are not smart.
+Output: quiet(john). not young(john). kind(steve). young(steve). rough(dan). round(dan). smart(dan). not young(dan). quiet(jane). not round(jane). not smart(X) :- kind(X), young(X).
+
+Input: Tom is tall. Tom is not kind. Sara is kind. Sara is tall. Kind, tall things are happy.
+Output: tall(tom). not kind(tom). kind(sara). tall(sara). happy(X) :- kind(X), tall(X).
+
+Input: Liam is strong. Liam is young. Emma is strong. Emma is not young. Strong, young things are brave.
+Output: strong(liam). young(liam). strong(emma). not young(emma). brave(X) :- strong(X), young(X).
+
+Input: Noah is smart. Noah is quiet. Ava is quiet. Ava is not smart. Quiet things are calm.
+Output: smart(noah). quiet(noah). quiet(ava). not smart(ava). calm(X) :- quiet(X).
+
+Input: Mia is kind. Mia is young. Ethan is kind. Ethan is not young. Kind things are friendly.
+Output: kind(mia). young(mia). kind(ethan). not young(ethan). friendly(X) :- kind(X).
+
+Predict:
 
 Input: {context}
 Output:
