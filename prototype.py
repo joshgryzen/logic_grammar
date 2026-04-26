@@ -6,16 +6,32 @@ from outlines.types import CFG
 import outlines
 import clingo
 import re
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "-m",
+    "--model",
+    required=True,
+    type=str,
+    help="Link to Hugging Face Model, i.e.: bigscience/bloom-560m",
+)
+
+args = vars(parser.parse_args())
+
+model_id = args["model"]
+model_name = pred = args["model"][args["model"].rfind("/") + 1 :].strip()
 
 login()
 
 # ========================================== Load model ==========================================
 model = outlines.from_transformers(
     AutoModelForCausalLM.from_pretrained(
-        "meta-llama/Llama-3.2-3B-Instruct",
+        # "meta-llama/Llama-3.2-3B-Instruct",
+        model_id,
         device_map="auto"
     ),
-    AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-3B-Instruct")
+    AutoTokenizer.from_pretrained(model_id)
 )
 
 # ========================================== Load RuleTaker ==========================================
@@ -29,8 +45,7 @@ Rules:
 - Basic facts are of the form: head.
 - Use lowercase predicates
 - Use X for variables
-- Use 'not' for negation in the body of a rule
-- Use '-' for negation in the head of a rule
+- Use 'not' for negation
 - End each rule with a period
 
 Examples:
@@ -38,17 +53,51 @@ Examples:
 def build_prompt(context):
     return f"""
 Translate the following statements into an Answer Set Programming (ASP) program.
-Input: Anne is quiet.
-Output: quiet(anne).
 
-Input: Anne is not young.
-Output: - young(anne).
+Rules:
+- Each sentence of the form "Name is property" becomes a fact: property(name).
+- Each sentence of the form "Name is not property" becomes: not property(name).
+- Names must be lowercase constants.
+- Properties become lowercase predicates.
+- General statements like "P, Q things are R" become rules: r(X) :- p(X), q(X).
+- If the conclusion is negated (e.g., "are not smart"), use: not smart(X).
+- Use exactly one variable X in rules.
+- Separate all facts and rules with a period and a space.
+- Do not include any extra text or explanations.
+- Output only a valid ASP program.
 
-Input: Kind, young things are not smart.
-Output: - smart(X) :- kind(X), young(X).
+Input: John is quiet. John is not young. Steve is kind. Steve is young. Dan is rough. Dan is round. Dan is smart. Dan is not young. Jane is quiet. Jane is not round. Kind, young things are not smart.
+Output: quiet(john). not young(john). kind(steve). young(steve). rough(dan). round(dan). smart(dan). not young(dan). quiet(jane). not round(jane). not smart(X) :- kind(X), young(X).
 
-Input: Anne is quiet. Anne is not young. Bob is kind. Bob is young. Dave is rough. Dave is round. Dave is smart. Dave is not young. Fiona is quiet. Fiona is not round. Kind, young things are not smart.
-Output: quiet(anne). - young(anne). kind(bob). young(bob). rough(dave). round(dave). smart(dave). - young(dave). quiet(fiona). - round(fiona). - smart(X) :- kind(X), young(X).
+Input: Tom is tall. Tom is not kind. Sara is kind. Sara is tall. Kind, tall things are happy.
+Output: tall(tom). not kind(tom). kind(sara). tall(sara). happy(X) :- kind(X), tall(X).
+
+Input: Liam is strong. Liam is young. Emma is strong. Emma is not young. Strong, young things are brave.
+Output: strong(liam). young(liam). strong(emma). not young(emma). brave(X) :- strong(X), young(X).
+
+Input: Noah is smart. Noah is quiet. Ava is quiet. Ava is not smart. Quiet things are calm.
+Output: smart(noah). quiet(noah). quiet(ava). not smart(ava). calm(X) :- quiet(X).
+
+Input: Mia is kind. Mia is young. Ethan is kind. Ethan is not young. Kind things are friendly.
+Output: kind(mia). young(mia). kind(ethan). not young(ethan). friendly(X) :- kind(X).
+
+Input: Olivia is fast. Olivia is strong. Lucas is fast. Lucas is not strong. Fast, strong things are powerful.
+Output: fast(olivia). strong(olivia). fast(lucas). not strong(lucas). powerful(X) :- fast(X), strong(X).
+
+Input: James is tall. James is quiet. Sophia is tall. Sophia is not quiet. Tall things are visible.
+Output: tall(james). quiet(james). tall(sophia). not quiet(sophia). visible(X) :- tall(X).
+
+Input: Henry is kind. Henry is young. Lucy is kind. Lucy is not young. Kind, young things are not rude.
+Output: kind(henry). young(henry). kind(lucy). not young(lucy). not rude(X) :- kind(X), young(X).
+
+Input: Jack is smart. Jack is tall. Jack is strong. Ella is smart. Ella is tall. Ella is not strong. Smart, tall, strong things are leaders.
+Output: smart(jack). tall(jack). strong(jack). smart(ella). tall(ella). not strong(ella). leader(X) :- smart(X), tall(X), strong(X).
+
+Input: Ava is kind. Ava is young. Ben is tall. Ben is strong. Kind things are friendly. Tall, strong things are powerful.
+Output: kind(ava). young(ava). tall(ben). strong(ben). friendly(X) :- kind(X). powerful(X) :- tall(X), strong(X).
+
+Input: Leo is smart. Leo is quiet. Mila is quiet. Mila is not smart. Quiet things are thoughtful. Smart, quiet things are focused.
+Output: smart(leo). quiet(leo). quiet(mila). not smart(mila). thoughtful(X) :- quiet(X). focused(X) :- smart(X), quiet(X).
 
 Input: {context}
 Output:
@@ -57,13 +106,13 @@ Output:
 # ========================================== NL → ASP ==========================================
 def nl_to_asp(context):
     prompt = build_prompt(context)
-    print(prompt)
+    # print(prompt)
     output = model(
         prompt,
         CFG(ASP_GRAMMAR),
         # max_new_tokens=150,
     )
-    print(output)
+    # print(output)
     return output.strip()
 
 # ========================================== Clean ASP output ==========================================
@@ -121,7 +170,6 @@ def evaluate(n_examples=5):
     for i, example in enumerate(ds.select(range(n_examples))):
         context = example["context"]
         question = example["question"]
-        print()
         label = example["label"]  # True / False
 
         print("\n============================")
@@ -130,6 +178,7 @@ def evaluate(n_examples=5):
         print("Question:", question)
 
         asp_raw = nl_to_asp(context)
+        print("Raw asp: ", asp_raw)
         try:
             asp_program = clean_asp(asp_raw)
         except:
