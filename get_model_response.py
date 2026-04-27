@@ -40,7 +40,6 @@ model = outlines.from_transformers(
 
 # ========================================== Load RuleTaker ==========================================
 ds = load_dataset("tasksource/ruletaker", split="train")
-
 # ========================================== Prompt for ASP generation ==========================================
 def build_prompt(context):
     return f"""
@@ -123,4 +122,4 @@ def evaluate(n_examples=5):
 
 # ========================================== Run ==========================================
 if __name__ == "__main__":
-    evaluate(100)
+    evaluate(1000)
