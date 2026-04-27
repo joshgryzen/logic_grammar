@@ -1,3 +1,5 @@
+import os
+
 from datasets import load_dataset
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 from huggingface_hub import login, InferenceClient
@@ -44,13 +46,15 @@ Translate the following statements into an Answer Set Programming (ASP) program.
 ### Rules:
 - Each sentence of the form "Name is property" becomes a fact: property(name).
 - Each sentence of the form "Name is not property" becomes: not property(name).
+- Each sentence of the form "The object is attribute" becomes: attribute(object).
+- Each sentence of the form "Entity1 verb entity2" becomes: verb(entity1, entity2).
 - Names must be lowercase constants.
 - Properties become lowercase predicates.
 - General statements like "P, Q things are R" become rules: r(X) :- p(X), q(X).
 - If the conclusion is negated (e.g., "are not smart"), use: not smart(X).
 - Separate all facts and rules with a period and a space.
 - Do not include any extra text or explanations.
-- Output only a valid ASP program.
+- Output only a valid Answer Set Programming (ASP) program.
 
 ### Examples:
 
