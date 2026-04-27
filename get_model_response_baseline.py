@@ -102,12 +102,7 @@ def predict_entailment(context, question):
     text = output[0]["generated_text"].strip().lower()
     print("Text: ", text)
 
-    if "not entailed" in text:
-        return "not entailed"
-    elif "entailed" in text:
-        return "entailed"
-    else: 
-        return "unkown"
+    return text
 
 # ========================================== Evaluation ==========================================
 def evaluate(n_examples=100):
@@ -142,4 +137,4 @@ def evaluate(n_examples=100):
 
 # ========================================== Run ==========================================
 if __name__ == "__main__":
-    evaluate(5)
+    evaluate(1000)
