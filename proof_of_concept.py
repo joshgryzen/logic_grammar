@@ -7,33 +7,13 @@ from prompts import Ruletaker_Prompt, FOL_prompt, SPEC_FOL_prompt, ASP_prompt, C
 from converters import cnl_to_asp, ace_to_fol
 
 login()
+pipe = pipeline("text-generation", model="meta-llama/Llama-3.2-3B-Instruct")
 
-# tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-3B-Instruct")
-outline_model = outlines.from_transformers(
-    AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-3B-Instruct", device_map="auto"),
-    AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-3B-Instruct")
-)
-inference = InferenceClient("meta-llama/Llama-3.1-8B-Instruct")
 
 # ===================================== LLM TO ASP =====================================
-
-ASP_output_type = CFG(ASP_GRAMMAR)
-
-# Can add stop_strings=["\n", "."], tokenizer=tokenizer to just generate one rule and ending at period
-ASP_output = outline_model(
-    Ruletaker_Prompt,
-    ASP_output_type,
-    max_new_tokens=20
-)
-print(f"ASP Program from outline model: {ASP_output}")
 messages = [{"role": "user", "content": Ruletaker_Prompt}]
-
-ASP_output_inferenced = inference.chat_completion(messages)
-content = ASP_output_inferenced.choices[0].message
-# print(f"API return: {ASP_output_inferenced}")
-print(f"ASP Program from outline model: {content}")
-
-
+ASP_output = pipe(messages)
+print(ASP_output)
 
 # ===================================== LLM TO FOL =====================================
 

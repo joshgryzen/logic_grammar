@@ -54,7 +54,6 @@ Translate the following statements into an Answer Set Programming (ASP) program.
 - Properties become lowercase predicates.
 - General statements like "P, Q things are R" become rules: r(X) :- p(X), q(X).
 - If the conclusion is negated (e.g., "are not smart"), use: not smart(X).
-- Use exactly one variable X in rules.
 - Separate all facts and rules with a period and a space.
 - Do not include any extra text or explanations.
 - Output only a valid ASP program.
@@ -73,8 +72,8 @@ Output: strong(liam). young(liam). strong(emma). not young(emma). brave(X) :- st
 Input: Noah is smart. Noah is quiet. Ava is quiet. Ava is not smart. Quiet things are calm.
 Output: smart(noah). quiet(noah). quiet(ava). not smart(ava). calm(X) :- quiet(X).
 
-Input: Mia is kind. Mia is young. Ethan is kind. Ethan is not young. Kind things are friendly.
-Output: kind(mia). young(mia). kind(ethan). not young(ethan). friendly(X) :- kind(X).
+Input: John visits Sam. Anna needs Sam. Sam is nice. Anna is not young. If something visits Sam then Sam needs John.
+Output: visits(john, sam). needs(anna, sam). nice(sam). not young(anna). needs(sam, john) :- visits(X, sam).
 
 ### Now translate:
 

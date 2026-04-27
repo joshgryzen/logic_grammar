@@ -1,5 +1,5 @@
 from datasets import load_dataset
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 from huggingface_hub import login, InferenceClient
 from grammars import ASP_GRAMMAR
 from outlines.types import CFG
@@ -22,14 +22,15 @@ args = vars(parser.parse_args())
 
 model_id = args["model"]
 model_name = pred = args["model"][args["model"].rfind("/") + 1 :].strip()
-output_file = model_name + "_results.xlsx"
+output_file = model_name + "_piped_results.xlsx"
 
 login()
 
 # ========================================== Load model ==========================================
 ASP_output_type = CFG(ASP_GRAMMAR)
 
-inference = InferenceClient(model_id)
+# inference = InferenceClient(model_id)
+pipe = pipeline("text-generation", model=model_id)
 
 # ========================================== Load RuleTaker ==========================================
 ds = load_dataset("tasksource/ruletaker", split="train")
@@ -47,7 +48,6 @@ Translate the following statements into an Answer Set Programming (ASP) program.
 - Properties become lowercase predicates.
 - General statements like "P, Q things are R" become rules: r(X) :- p(X), q(X).
 - If the conclusion is negated (e.g., "are not smart"), use: not smart(X).
-- Use exactly one variable X in rules.
 - Separate all facts and rules with a period and a space.
 - Do not include any extra text or explanations.
 - Output only a valid ASP program.
@@ -66,8 +66,8 @@ Output: strong(liam). young(liam). strong(emma). not young(emma). brave(X) :- st
 Input: Noah is smart. Noah is quiet. Ava is quiet. Ava is not smart. Quiet things are calm.
 Output: smart(noah). quiet(noah). quiet(ava). not smart(ava). calm(X) :- quiet(X).
 
-Input: Mia is kind. Mia is young. Ethan is kind. Ethan is not young. Kind things are friendly.
-Output: kind(mia). young(mia). kind(ethan). not young(ethan). friendly(X) :- kind(X).
+Input: John visits Sam. Anna needs Sam. Sam is nice. Anna is not young. If something visits Sam then Sam needs John.
+Output: visits(john, sam). needs(anna, sam). nice(sam). not young(anna). needs(sam, john) :- visits(X, sam).
 
 ### Now translate:
 
@@ -80,18 +80,20 @@ def nl_to_asp(context):
     prompt = build_prompt(context)
     print("Prompt: ", prompt)
     messages = [{"role": "user", "content": prompt}]
-    output = inference.chat_completion(messages)
-    content = output.choices[0].message
-    print("Output:", content)
-    return content
+    output = pipe(messages)
+    print("Output:", output)
+    return output
 
 
 # ========================================== Run evaluation ==========================================
-def evaluate():
+def evaluate(n_examples=5):
     results = []
-
-    for i, example in enumerate(ds):
+    previous_context = ""
+    for i, example in enumerate(ds.select(range(n_examples))):
         context = example["context"]
+        if context == previous_context: 
+            continue
+        previous_context = context
         question = example["question"]
 
         print("\n============================")
