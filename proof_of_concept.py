@@ -1,39 +1,48 @@
 from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM
-from huggingface_hub import login
+from huggingface_hub import login, InferenceClient
 import outlines
 from outlines.types import CFG
-from grammars import ASP_GRAMMAR, SMALL_FOL_GRAMMAR, ENTIRE_FOL_GRAMMAR, MINI_CNL_GRAMMAR, ENTIRE_CNL_GRAMMAR, MINI_ACE_GRAMMAR
-from prompts import FOL_prompt, SPEC_FOL_prompt, ASP_prompt, CNL_prompt, ACE_prompt
+from grammars import SMALL_ASP_GRAMMAR, ASP_GRAMMAR, SMALL_FOL_GRAMMAR, ENTIRE_FOL_GRAMMAR, MINI_CNL_GRAMMAR, ENTIRE_CNL_GRAMMAR, MINI_ACE_GRAMMAR
+from prompts import Ruletaker_Prompt, FOL_prompt, SPEC_FOL_prompt, ASP_prompt, CNL_prompt, ACE_prompt
 from converters import cnl_to_asp, ace_to_fol
 
 login()
 
 # tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-3B-Instruct")
-model = outlines.from_transformers(
+outline_model = outlines.from_transformers(
     AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-3B-Instruct", device_map="auto"),
     AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-3B-Instruct")
 )
+inference = InferenceClient("meta-llama/Llama-3.1-8B-Instruct")
 
 # ===================================== LLM TO ASP =====================================
 
 ASP_output_type = CFG(ASP_GRAMMAR)
 
 # Can add stop_strings=["\n", "."], tokenizer=tokenizer to just generate one rule and ending at period
-ASP_output = model(
-    ASP_prompt,
+ASP_output = outline_model(
+    Ruletaker_Prompt,
     ASP_output_type,
     max_new_tokens=20
 )
-print(f"ASP Program: {ASP_output}")
+print(f"ASP Program from outline model: {ASP_output}")
+messages = [{"role": "user", "content": Ruletaker_Prompt}]
+
+ASP_output_inferenced = inference.chat_completion(messages)
+content = ASP_output_inferenced.choices[0].message
+# print(f"API return: {ASP_output_inferenced}")
+print(f"ASP Program from outline model: {content}")
+
+
 
 # ===================================== LLM TO FOL =====================================
 
-FOL_output_type = CFG(SMALL_FOL_GRAMMAR)
+# FOL_output_type = CFG(SMALL_FOL_GRAMMAR)
 
-# Can add stop_strings=["\n", "."], tokenizer=tokenizer to just generate one formula and ending at new line
-FOL_output = model(SPEC_FOL_prompt, FOL_output_type, max_new_tokens=20)
+# # Can add stop_strings=["\n", "."], tokenizer=tokenizer to just generate one formula and ending at new line
+# FOL_output = model(SPEC_FOL_prompt, FOL_output_type, max_new_tokens=20)
 
-print(f"FOL Program: {FOL_output}")
+# print(f"FOL Program: {FOL_output}")
 
 # ===================================== LLM TO CNL TO ASP =====================================
 

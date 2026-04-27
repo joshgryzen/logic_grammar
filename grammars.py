@@ -699,6 +699,17 @@ specification: (annotated_formula ".")*
 start: specification
 """
 
+SMALL_ASP_GRAMMAR = r"""
+atom: /[a-z]/
+literal: "not "? atom 
+body: (literal ", ")* literal "."
+head: atom? " :- "
+basic: head body
+fact: atom
+rule: fact | basic
+start: rule*
+"""
+
 ASP_GRAMMAR = r"""
 // --------------------
 // Terminals
@@ -824,7 +835,7 @@ atomic_formula: comparison | literal
 
 basic_head: atom
 choice_head: "{" atom "}"
-negated_head: "not" atom
+negated_head: negation atom
 # falsity: "#false"?
 
 head: basic_head | choice_head | negated_head

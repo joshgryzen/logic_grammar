@@ -7,6 +7,7 @@ import outlines
 import clingo
 import re
 import argparse
+import pandas as pd
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -21,10 +22,13 @@ args = vars(parser.parse_args())
 
 model_id = args["model"]
 model_name = pred = args["model"][args["model"].rfind("/") + 1 :].strip()
+output_file = model_name + "_results.xlsx"
 
 login()
 
 # ========================================== Load model ==========================================
+ASP_output_type = CFG(ASP_GRAMMAR)
+
 model = outlines.from_transformers(
     AutoModelForCausalLM.from_pretrained(
         # "meta-llama/Llama-3.2-3B-Instruct",
@@ -84,109 +88,37 @@ def nl_to_asp(context):
     print("Prompt: ", prompt)
     output = model(
         prompt,
-        # CFG(ASP_GRAMMAR),
-        # max_new_tokens=150,
+        ASP_output_type,
     )
     print("Output:", output)
     return output.strip()
 
-# ========================================== Clean ASP output ==========================================
-def clean_asp(program):
-    lines = program.split("\n")
-    cleaned = []
-
-    for line in lines:
-        line = line.strip()
-
-        # keep only ASP-like lines
-        if ":-" in line or line.endswith("."):
-            line = re.sub(r"[^a-zA-Z0-9_().,:\\- ]", "", line)
-            cleaned.append(line)
-
-    return "\n".join(cleaned)
-
-# ========================================== Parse question → query atom ==========================================
-def question_to_query(question):
-    question = question.lower()
-
-    # very simple heuristics
-    if "does" in question or "is" in question:
-        words = re.findall(r"[a-z]+", question)
-
-        if len(words) >= 3:
-            subj = words[1]
-            pred = words[-1]
-
-            return f"{pred}({subj})"
-
-    return None
-
-# ========================================== Run Clingo ==========================================
-def run_clingo(program, query):
-    ctl = clingo.Control()
-
-    full_program = program + f"\n#show {query}/1."
-
-    ctl.add("base", [], full_program)
-    ctl.ground([("base", [])])
-
-    result_atoms = []
-
-    with ctl.solve(yield_=True) as handle:
-        for model in handle:
-            result_atoms.extend([str(atom) for atom in model.symbols(shown=True)])
-
-    return result_atoms
 
 # ========================================== Run evaluation ==========================================
-def evaluate(n_examples=5):
-    correct = 0
+def evaluate():
+    results = []
 
-    for i, example in enumerate(ds.select(range(n_examples))):
+    for i, example in enumerate(ds):
         context = example["context"]
         question = example["question"]
-        label = example["label"]  # True / False
 
         print("\n============================")
         print(f"Example {i+1}")
         print("Context:", context)
         print("Question:", question)
-
         asp_raw = nl_to_asp(context)
-        print("Raw asp: ", asp_raw)
-        try:
-            asp_program = clean_asp(asp_raw)
-        except:
-            asp_program = "error"
+        print("Raw ASP from model: ", asp_raw)
+        results.append({
+            "context": context,
+            "question": question,
+            "asp_raw": asp_raw
+        })
+    # save to Excel
+    df = pd.DataFrame(results)
+    df.to_excel(output_file, index=False)
 
-        print("\nGenerated ASP:")
-        print(asp_program)
-
-        query = question_to_query(question)
-        print("\nQuery:", query)
-
-        if not query:
-            print("⚠️ Could not parse query")
-            continue
-
-        try:
-            atoms = run_clingo(asp_program, query)
-            print("\nAnswer Set:", atoms)
-
-            prediction = query in atoms
-
-            print("Prediction:", prediction)
-            print("Gold:", label)
-
-            if prediction == label:
-                correct += 1
-
-        except Exception as e:
-            print("❌ Clingo error:", e)
-
-    print("\n============================")
-    print(f"Accuracy: {correct}/{n_examples} = {correct/n_examples:.2f}")
+    print(f"Saved results to: {output_file}")
 
 # ========================================== Run ==========================================
 if __name__ == "__main__":
-    evaluate(5)
+    evaluate()
