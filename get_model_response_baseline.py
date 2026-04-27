@@ -91,23 +91,23 @@ Answer:
 # ========================================== LLM inference ==========================================
 def predict_entailment(context, question):
     prompt = build_baseline_prompt(context, question)
-
+    print("Prompt: ", prompt)
     output = pipe(
         prompt,
         max_new_tokens=5,
         do_sample=False,
         return_full_text=False
     )
-
+    print("Output: ", output)
     text = output[0]["generated_text"].strip().lower()
+    print("Text: ", text)
 
-    # Extract clean label
-    if "entailed" in text:
-        return "entailed"
-    elif "not" in text:
+    if "not entailed" in text:
         return "not entailed"
-    else:
-        return "unknown"
+    elif "entailed" in text:
+        return "entailed"
+    else: 
+        return "unkown"
 
 # ========================================== Evaluation ==========================================
 def evaluate(n_examples=100):
@@ -142,4 +142,4 @@ def evaluate(n_examples=100):
 
 # ========================================== Run ==========================================
 if __name__ == "__main__":
-    evaluate(1000)
+    evaluate(5)
