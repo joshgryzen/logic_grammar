@@ -1,6 +1,6 @@
 from datasets import load_dataset
 from transformers import AutoTokenizer, AutoModelForCausalLM
-from huggingface_hub import login
+from huggingface_hub import login, InferenceClient
 from grammars import ASP_GRAMMAR
 from outlines.types import CFG
 import outlines
@@ -29,14 +29,7 @@ login()
 # ========================================== Load model ==========================================
 ASP_output_type = CFG(ASP_GRAMMAR)
 
-model = outlines.from_transformers(
-    AutoModelForCausalLM.from_pretrained(
-        # "meta-llama/Llama-3.2-3B-Instruct",
-        model_id,
-        device_map="auto"
-    ),
-    AutoTokenizer.from_pretrained(model_id)
-)
+inference = InferenceClient(model_id)
 
 # ========================================== Load RuleTaker ==========================================
 ds = load_dataset("tasksource/ruletaker", split="train")
@@ -86,23 +79,19 @@ Output:
 def nl_to_asp(context):
     prompt = build_prompt(context)
     print("Prompt: ", prompt)
-    output = model(
-        prompt,
-        ASP_output_type,
-    )
-    print("Output:", output)
-    return output.strip()
+    messages = [{"role": "user", "content": prompt}]
+    output = inference.chat_completion(messages)
+    content = output.choices[0].message
+    print("Output:", content)
+    return content
 
 
 # ========================================== Run evaluation ==========================================
-def evaluate(n_examples=5):
+def evaluate():
     results = []
-    previous_context = ""
-    for i, example in enumerate(ds.select(range(n_examples))):
+
+    for i, example in enumerate(ds):
         context = example["context"]
-        if context == previous_context: 
-            continue
-        previous_context = context
         question = example["question"]
 
         print("\n============================")
@@ -124,4 +113,4 @@ def evaluate(n_examples=5):
 
 # ========================================== Run ==========================================
 if __name__ == "__main__":
-    evaluate(100)
+    evaluate()
