@@ -90,7 +90,7 @@ def nl_to_asp(context):
     prompt = build_prompt(context)
     print("Prompt: ", prompt)
     messages = [{"role": "user", "content": prompt}]
-    output = pipe(messages)
+    output = pipe(messages, return_full_text=False)
     print("Output:", output)
     return output
 
