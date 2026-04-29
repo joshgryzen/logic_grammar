@@ -40,8 +40,6 @@ Determine whether the query is logically entailed by the given context.
 - Do not generate any code. 
 - Do not generate anything other than "entailed" or "not entailed".
 
-### Examples
-
 Context: John is quiet. John is not young. Steve is kind. Steve is young. Dan is rough. Dan is round. Dan is smart. Dan is not young. Jane is quiet. Jane is not round. Kind, young things are not smart.
 Query: Steven is smart.
 Answer: not entailed
@@ -81,8 +79,6 @@ Answer: entailed
 Context: John visits Sam. Anna needs Sam. Sam is nice. Anna is not young. If something visits Sam then Sam needs John.
 Query: Anna needs John.
 Answer: not entailed
-
-### Now solve
 
 Context: {context}
 Query: {question}
