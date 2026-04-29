@@ -41,30 +41,6 @@ Context: John is quiet. John is not young. Steve is kind. Steve is young. Dan is
 Query: Steven is not smart.
 Answer: entailed
 
-Context: Tom is tall. Tom is not kind. Sara is kind. Sara is tall. Kind, tall things are happy.
-Query: Sara is happy.
-Answer: entailed
-
-Context: Tom is tall. Tom is not kind. Sara is kind. Sara is tall. Kind, tall things are happy.
-Query: Tom is happy.
-Answer: not entailed
-
-Context: Liam is strong. Liam is young. Emma is strong. Emma is not young. Strong, young things are brave.
-Query: Liam is brave.
-Answer: entailed
-
-Context: Liam is strong. Liam is young. Emma is strong. Emma is not young. Strong, young things are brave.
-Query: Emma is brave.
-Answer: not entailed
-
-Context: Noah is smart. Noah is quiet. Ava is quiet. Ava is not smart. Quiet things are calm.
-Query: Noah is calm.
-Answer: entailed
-
-Context: Noah is smart. Noah is quiet. Ava is quiet. Ava is not smart. Quiet things are calm.
-Query: Ava is calm.
-Answer: entailed
-
 Context: John visits Sam. Anna needs Sam. Sam is nice. Anna is not young. If something visits Sam then Sam needs John.
 Query: Sam needs John.
 Answer: entailed
@@ -89,8 +65,8 @@ def predict_entailment(context, question):
         max_new_tokens=3,
         # do_sample=False,
         # temperature=0.0,
-        return_full_text=False,
-        eos_token_id=newline_token_id
+        # eos_token_id=newline_token_id,
+        return_full_text=False
     )
     print("Output: ", output)
     text = output[0]["generated_text"].strip().lower()
