@@ -105,7 +105,7 @@ def predict_entailment(context, question):
     )
     print("Output: ", output)
     text = output[0]["generated_text"].strip().lower()
-    cleaned_text = re.sub(r'[^a-zA-Z]', '', text)
+    cleaned_text = re.sub(r'[^a-zA-Z]', '', text).strip().lower()
     print("Text: ", text)
     print("Cleaned Text: ", cleaned_text)
 
@@ -119,7 +119,10 @@ def evaluate(n_examples=100):
     for i, example in enumerate(ds.select(range(n_examples))):
         context = example["context"]
         question = example["question"]
-        label = example["label"]  # dataset label
+        label = example["label"].strip().lower()  # dataset label
+
+        if label == "entailment": label = "entailed"
+        if label == "not entailment": label = "not entailed"
 
         print("\n============================")
         print(f"Example {i+1}")
