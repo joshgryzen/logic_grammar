@@ -82,9 +82,15 @@ Answer:
 def predict_entailment(context, question):
     prompt = build_baseline_prompt(context, question)
     print("Prompt: ", prompt)
+    newline_token_id = pipe.tokenizer("\n", add_special_tokens=False)["input_ids"][0]
+
     output = pipe(
-    prompt,
-    return_full_text=False
+        prompt,
+        # max_new_tokens=3,
+        # do_sample=False,
+        # temperature=0.0,
+        return_full_text=False,
+        eos_token_id=newline_token_id
     )
     print("Output: ", output)
     text = output[0]["generated_text"].strip().lower()
