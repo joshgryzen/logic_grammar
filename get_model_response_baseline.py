@@ -31,7 +31,16 @@ ds = load_dataset("tasksource/ruletaker", split="train")
 # ========================================== Prompt ==========================================
 def build_baseline_prompt(context, question):
     return f"""
-Determine whether the query is logically entailed by the given context. Answer with ONLY: "entailed" or "not entailed". Do not include explanations. Do not generate any code. Do not generate anything other than "entailed" or "not entailed".
+### Task
+Determine whether the query is logically entailed by the given context. 
+
+### Rules:
+- Answer with ONLY: "entailed" or "not entailed". 
+- Do not include explanations. 
+- Do not generate any code. 
+- Do not generate anything other than "entailed" or "not entailed".
+
+### Examples:
 
 Context: John is quiet. John is not young. Steve is kind. Steve is young. Dan is rough. Dan is round. Dan is smart. Dan is not young. Jane is quiet. Jane is not round. Kind, young things are not smart.
 Query: Steven is smart.
@@ -73,6 +82,8 @@ Context: John visits Sam. Anna needs Sam. Sam is nice. Anna is not young. If som
 Query: Anna needs John.
 Answer: not entailed
 
+### Now answer:
+
 Context: {context}
 Query: {question}
 Answer: 
@@ -94,13 +105,16 @@ def predict_entailment(context, question):
     )
     print("Output: ", output)
     text = output[0]["generated_text"].strip().lower()
+    cleaned_text = re.sub(r'[^a-zA-Z]', '', text)
     print("Text: ", text)
+    print("Cleaned Text: ", cleaned_text)
 
-    return text
+    return cleaned_text
 
 # ========================================== Evaluation ==========================================
 def evaluate(n_examples=100):
     results = []
+    num_correct = 0
 
     for i, example in enumerate(ds.select(range(n_examples))):
         context = example["context"]
@@ -117,13 +131,18 @@ def evaluate(n_examples=100):
         print("Prediction:", pred)
         print("Label:", label)
 
+        if pred == label: num_correct += 1
+
         results.append({
             "context": context,
             "question": question,
             "prediction": pred,
             "label": label
         })
-
+    accuracy = num_correct/n_examples
+    results.append({
+            "accuracy": accuracy
+        })
     df = pd.DataFrame(results)
     df.to_excel(output_file, index=False)
 
@@ -131,4 +150,4 @@ def evaluate(n_examples=100):
 
 # ========================================== Run ==========================================
 if __name__ == "__main__":
-    evaluate(1000)
+    evaluate(1)
