@@ -31,14 +31,7 @@ ds = load_dataset("tasksource/ruletaker", split="train")
 # ========================================== Prompt ==========================================
 def build_baseline_prompt(context, question):
     return f"""
-### Task
-Determine whether the query is logically entailed by the given context.
-
-### Instructions
-- Answer with ONLY one word: "yes" or "no".
-- Do not include explanations.
-- Do not generate any code. 
-- Do not generate anything other than "yes" or "not".
+Determine whether the query is logically entailed by the given context. Answer with ONLY one word: "yes" or "no". Do not include explanations. Do not generate any code. Do not generate anything other than "yes" or "no".
 
 Context: John is quiet. John is not young. Steve is kind. Steve is young. Dan is rough. Dan is round. Dan is smart. Dan is not young. Jane is quiet. Jane is not round. Kind, young things are not smart.
 Query: Is Steven is smart?
