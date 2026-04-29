@@ -86,7 +86,7 @@ def predict_entailment(context, question):
 
     output = pipe(
         prompt,
-        # max_new_tokens=3,
+        max_new_tokens=3,
         # do_sample=False,
         # temperature=0.0,
         return_full_text=False,
