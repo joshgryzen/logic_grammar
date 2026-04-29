@@ -75,7 +75,7 @@ Answer: not entailed
 
 Context: {context}
 Query: {question}
-Answer:
+Answer: 
 """
 
 # ========================================== LLM inference ==========================================
@@ -105,7 +105,7 @@ def evaluate(n_examples=100):
     for i, example in enumerate(ds.select(range(n_examples))):
         context = example["context"]
         question = example["question"]
-        label = example.get("answer", "unknown")  # dataset label
+        label = example["label"]  # dataset label
 
         print("\n============================")
         print(f"Example {i+1}")
@@ -115,13 +115,13 @@ def evaluate(n_examples=100):
         pred = predict_entailment(context, question)
 
         print("Prediction:", pred)
-        print("Gold:", label)
+        print("Label:", label)
 
         results.append({
             "context": context,
             "question": question,
             "prediction": pred,
-            "gold": label
+            "label": label
         })
 
     df = pd.DataFrame(results)
