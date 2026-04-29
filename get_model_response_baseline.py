@@ -35,9 +35,10 @@ def build_baseline_prompt(context, question):
 Determine whether the query is logically entailed by the given context.
 
 ### Instructions
-- Use logical reasoning.
-- Answer with ONLY one word: "entailed" or "not entailed".
+- Answer with ONLY: "entailed" or "not entailed".
 - Do not include explanations.
+- Do not generate any code. 
+- Do not generate anything other than "entailed" or "not entailed".
 
 ### Examples
 
@@ -93,10 +94,11 @@ def predict_entailment(context, question):
     prompt = build_baseline_prompt(context, question)
     print("Prompt: ", prompt)
     output = pipe(
-        prompt,
-        max_new_tokens=5,
-        do_sample=False,
-        return_full_text=False
+    prompt,
+    max_new_tokens=3,
+    do_sample=False,
+    temperature=0.0,
+    return_full_text=False
     )
     print("Output: ", output)
     text = output[0]["generated_text"].strip().lower()
@@ -137,4 +139,4 @@ def evaluate(n_examples=100):
 
 # ========================================== Run ==========================================
 if __name__ == "__main__":
-    evaluate(1000)
+    evaluate(1)
