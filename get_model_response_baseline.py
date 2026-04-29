@@ -31,47 +31,47 @@ ds = load_dataset("tasksource/ruletaker", split="train")
 # ========================================== Prompt ==========================================
 def build_baseline_prompt(context, question):
     return f"""
-Determine whether the query is logically entailed by the given context. Answer with ONLY one word: "yes" or "no". Do not include explanations. Do not generate any code. Do not generate anything other than "yes" or "no".
+Determine whether the query is logically entailed by the given context. Answer with ONLY: "entailed" or "not entailed". Do not include explanations. Do not generate any code. Do not generate anything other than "entailed" or "not entailed".
 
 Context: John is quiet. John is not young. Steve is kind. Steve is young. Dan is rough. Dan is round. Dan is smart. Dan is not young. Jane is quiet. Jane is not round. Kind, young things are not smart.
-Query: Is Steven is smart?
-Answer: no
+Query: Steven is smart.
+Answer: not entailed
 
 Context: John is quiet. John is not young. Steve is kind. Steve is young. Dan is rough. Dan is round. Dan is smart. Dan is not young. Jane is quiet. Jane is not round. Kind, young things are not smart.
-Query: Is Steven not smart?
-Answer: yes
+Query: Steven is not smart.
+Answer: entailed
 
 Context: Tom is tall. Tom is not kind. Sara is kind. Sara is tall. Kind, tall things are happy.
-Query: Is Sarah happy?
-Answer: yes
+Query: Sara is happy.
+Answer: entailed
 
 Context: Tom is tall. Tom is not kind. Sara is kind. Sara is tall. Kind, tall things are happy.
-Query: Is Tom happy?
-Answer: no
+Query: Tom is happy.
+Answer: not entailed
 
 Context: Liam is strong. Liam is young. Emma is strong. Emma is not young. Strong, young things are brave.
-Query: Is Liam brave?
-Answer: yes
+Query: Liam is brave.
+Answer: entailed
 
 Context: Liam is strong. Liam is young. Emma is strong. Emma is not young. Strong, young things are brave.
-Query: Is Emma Brave?
-Answer: no
+Query: Emma is brave.
+Answer: not entailed
 
 Context: Noah is smart. Noah is quiet. Ava is quiet. Ava is not smart. Quiet things are calm.
-Query: Is Noah calm?
-Answer: yes
+Query: Noah is calm.
+Answer: entailed
 
 Context: Noah is smart. Noah is quiet. Ava is quiet. Ava is not smart. Quiet things are calm.
-Query: Is Ava calm?
-Answer: yes
+Query: Ava is calm.
+Answer: entailed
 
 Context: John visits Sam. Anna needs Sam. Sam is nice. Anna is not young. If something visits Sam then Sam needs John.
-Query: Does Sam need John?
-Answer: yes
+Query: Sam needs John.
+Answer: entailed
 
 Context: John visits Sam. Anna needs Sam. Sam is nice. Anna is not young. If something visits Sam then Sam needs John.
-Query: Does Anna need John?
-Answer: no
+Query: Anna needs John.
+Answer: not entailed
 
 Context: {context}
 Query: {question}
@@ -84,7 +84,7 @@ def predict_entailment(context, question):
     print("Prompt: ", prompt)
     output = pipe(
     prompt,
-    max_new_tokens=1,
+    max_new_tokens=3,
     do_sample=False,
     temperature=0.0,
     return_full_text=False
