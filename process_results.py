@@ -5,8 +5,8 @@ import tempfile
 import re
 
 # ========================= Load file =========================
-input_file = "Llama-3.1-8B-Instruct_piped_strong_negation_results.xlsx"   # your file
-output_file = "Llama-3.1-8B-Instruct_piped_strong_negation_results_processed_results.xlsx"
+input_file = "Llama-3.2-3B-Instruct_piped_strong_negation_results.xlsx"   # your file
+output_file = "Llama-3.2-3B-Instruct_piped_strong_negation_results_processed_results.xlsx"
 
 df = pd.read_excel(input_file)
 
