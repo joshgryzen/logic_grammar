@@ -18,6 +18,7 @@ cuda-toolkit==13.0.2
 datasets==4.8.4
 dill==0.4.1
 diskcache==5.6.3
+et_xmlfile==2.0.0
 filelock==3.29.0
 frozenlist==1.8.0
 fsspec==2026.2.0
@@ -56,6 +57,7 @@ nvidia-nccl-cu13==2.28.9
 nvidia-nvjitlink==13.0.88
 nvidia-nvshmem-cu13==3.4.5
 nvidia-nvtx==13.0.85
+openpyxl==3.1.5
 outlines==1.2.12
 outlines_core==0.2.14
 packaging==26.1
