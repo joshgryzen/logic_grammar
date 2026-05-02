@@ -3,7 +3,6 @@ import os
 from datasets import load_dataset
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 from huggingface_hub import login, InferenceClient
-from grammars import ASP_GRAMMAR
 from outlines.types import CFG
 import outlines
 import clingo
@@ -29,7 +28,6 @@ output_file = model_name + "_piped_strong_negation_results.xlsx"
 login()
 
 # ========================================== Load model ==========================================
-ASP_output_type = CFG(ASP_GRAMMAR)
 
 # inference = InferenceClient(model_id)
 pipe = pipeline("text-generation", model=model_id)
