@@ -1,3 +1,9 @@
+Recommended Python version 3.10+. 
+
+Install requirements with: 
+
+`pip install -r requirements.txt`
+
 Run **get_model_response_with_pipe_strong_negation.py** to test a how hugging face model can translate the ruletaker dataset into ASP.
 
 Example running with **Llama**:
