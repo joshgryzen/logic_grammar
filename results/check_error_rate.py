@@ -2,7 +2,7 @@ import pandas as pd
 
 def analyze_answer_sets():
     # File name referenced verbatim
-    file_path = "Llama-3.1-8B-Instruct_piped_strong_negation_results_processed_results.xlsx"
+    file_path = "Llama-3.1-8B-processed_results.xlsx"
     answer_column = "answer_sets"
     
     # UPDATE THIS to match the column that contains your True/False results
@@ -33,7 +33,7 @@ def analyze_answer_sets():
         # 3. Calculate Accuracy Disregarding Malformed Programs
         if correctness_column in df.columns:
             # Combine masks to flag any row that is malformed
-            malformed_mask = unknown_mask | unsatisfiable_mask | error_mask
+            malformed_mask = unknown_mask | error_mask
             
             # Filter the dataframe to KEEP only rows that are NOT malformed
             valid_df = df[~malformed_mask]
